@@ -49,17 +49,18 @@ function main()
     
     if parsed_args["chunksize"] !=0
         covar_matrix = solve_Chunky(cov_table,parsed_args["lasso"],chnksize = parsed_args["chunksize"])
-        if lower(parsed_args["return_type"]) == "precision"
+        if lowercase(parsed_args["return_type"]) == "precision"
             precision_m = inv(covar_matrix)
         end
     else
         precision_m = solve_withSDP(cov_table,parsed_args["lasso"])
-        if lower(parsed_args["return_type"]) == "covariance"
+        if lowercase(parsed_args["return_type"]) == "covariance"
             covar_matrix = inv(precision_m)
         end
     end
 
     nm = parsed_args["name"]
+
 
     cov_table_tab = Tables.table(hcat(clr_table[:otus],cov_table))
     CSV.write("$nm.cov_table.csv", cov_table_tab, header = vcat([""],clr_table[:otus]))
@@ -67,7 +68,7 @@ function main()
     clr_tab = Tables.table(hcat(clr_table[:otus],clr_table[:otuTable]))
     CSV.write("$nm.clr_table.csv",  clr_tab, header = vcat([""],clr_table[:samples]))
 
-    if lower(parsed_args["return_type"]) == "covariance"
+    if lowercase(parsed_args["return_type"]) == "covariance"
         estimate_covtable = Tables.table(hcat(clr_table[:otus],covar_matrix))
         CSV.write("$nm.csv",  estimate_covtable, header = vcat([""],clr_table[:otus]))
     else
