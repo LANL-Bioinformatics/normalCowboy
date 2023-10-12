@@ -159,7 +159,7 @@ cython_debug/
 
 *.png
 normalCowboyBenchmarking.ipynb
-*.csv
+
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
