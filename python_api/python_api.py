@@ -1,6 +1,8 @@
 import subprocess
 import pandas as pd
-
+import sys
+import os
+import pkgutil
 
 def glasso(otu_tables,lam = 0.03,normtype = "dirichlet",chunkyness = 0,name = "glasso",table_type="counts",return_precision = False):
 
@@ -38,18 +40,24 @@ def glasso(otu_tables,lam = 0.03,normtype = "dirichlet",chunkyness = 0,name = "g
     else:
         rtype = "covariance"
 
+    current = pkgutil.get_loader("normalCowboy").get_filename()
+    current = os.path.dirname(os.path.abspath(current))
+
+    julpath = os.path.join(current,"normalcowboy.jl","normalCowboy.jl")
+
+
     if isinstance(otu_tables,dict):
         csvnames = []
         for ky,tab in otu_tables.items():
             tot_taxa += len(tab)
             tab.to_csv("otutab_{}.csv".format(ky))
             csvnames += ["otutab_{}.csv".format(ky)]
-        command = "julia ../normalcowboy.jl/normalCowboy.jl " + " ".join(csvnames) + " -l={} -c={} -z={} -n={} -t={} -r={}".format(lam,chunkyness,normtype,name,table_type,rtype)
+        command = "julia " + julpath +" "+ " ".join(csvnames) + " -l={} -c={} -z={} -n={} -t={} -r={}".format(lam,chunkyness,normtype,name,table_type,rtype)
     
     else:
         tot_taxa = len(otu_tables)
         otu_tables.to_csv("otutab.csv")
-        command = "julia ../normalcowboy.jl/normalCowboy.jl otutab.csv" + " -l={} -c={} -z={} -n={} -t={} -r={}".format(lam,chunkyness,normtype,name,table_type,rtype)
+        command = "julia " + julpath + " otutab.csv" + " -l={} -c={} -z={} -n={} -t={} -r={}".format(lam,chunkyness,normtype,name,table_type,rtype)
 
     print("[glasso] Computing GLASSO Fit using NormalCowboy with {} total taxa".format(tot_taxa))
     subprocess.run(command,shell = True)

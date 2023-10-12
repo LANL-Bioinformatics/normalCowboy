@@ -40,19 +40,25 @@ parsed_args = parse_args(ARGS, s)
 
 
 function main()
+
+    println("[normalCowboy] importing data")
+
     dsets = Dict()
     for j in parsed_args["otutables"]
         dsets[j] = import_table(j)
     end
 
+    println("[normalCowboy] making empiracle covariance matrix")
     cov_table,clr_table = make_covtable(dsets,method=parsed_args["zero_method"],table_type=parsed_args["table_type"])
     
     if parsed_args["chunksize"] !=0
+        println(["[normalCowboy] solving -- chunky"])
         covar_matrix = solve_Chunky(cov_table,parsed_args["lasso"],chnksize = parsed_args["chunksize"])
         if lowercase(parsed_args["return_type"]) == "precision"
             precision_m = inv(covar_matrix)
         end
     else
+        println(["[normalCowboy] solving -- smooth"])
         precision_m = solve_withSDP(cov_table,parsed_args["lasso"])
         if lowercase(parsed_args["return_type"]) == "covariance"
             covar_matrix = inv(precision_m)
@@ -61,7 +67,7 @@ function main()
 
     nm = parsed_args["name"]
 
-
+    println(["[normalCowboy] writing results"])
     cov_table_tab = Tables.table(hcat(clr_table[:otus],cov_table))
     CSV.write("$nm.cov_table.csv", cov_table_tab, header = vcat([""],clr_table[:otus]))
 
